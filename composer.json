@@ -1,0 +1,29 @@
+{
+  "name": "drafolin/filament-inverse-shield",
+  "description": "Package to facilitate persistance of Filament Shield's roles and permissions",
+  "type": "library",
+  "require": {
+    "laravel/framework": "^11.39",
+    "bezhansalleh/filament-shield": "^3.3",
+    "illuminate/support": "*"
+  },
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Drafolin\\FilamentInverseShield\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Dråfølin",
+      "email": "derg@drafolin.ch"
+    }
+  ],
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Drafolin\\FilamentInverseShield\\FilamentInverseShieldServiceProvider"
+      ]
+    }
+  }
+}
