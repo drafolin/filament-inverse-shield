@@ -3,8 +3,8 @@
   "description": "Package to facilitate persistance of Filament Shield's roles and permissions",
   "type": "library",
   "require": {
-    "laravel/framework": "^11.39",
-    "bezhansalleh/filament-shield": "^3.3",
+    "laravel/framework": ">=10.0",
+    "bezhansalleh/filament-shield": "^3.0",
     "illuminate/support": "*"
   },
   "license": "MIT",
