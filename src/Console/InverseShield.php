@@ -13,7 +13,7 @@ class InverseShield extends Command
      *
      * @var string
      */
-    protected $signature = "inverse-shield {--panel=admin}";
+    protected $signature = "inverse-shield {--panel=admin} {--seeder=ShieldSeeder}";
 
     /**
      * The console command description.
@@ -56,6 +56,7 @@ PHP;
         $this->info("Dumped roles and permissions to seeder");
 
         $panel = $this->option("panel");
+        $seeder = $this->option("seeder");
         $result = <<<PHP
 <?php
 /**
@@ -102,15 +103,15 @@ $roles
 }
 PHP;
         if (
-            file_exists(database_path("seeders/ShieldSeeder.php")) &&
+            file_exists(database_path("seeders/$seeder.php")) &&
             !$this->confirm(
-                "File database/seeders/ShieldSeeder.php already exists. Do you want to overwrite it?"
+                "File database/seeders/$seeder.php already exists. Do you want to overwrite it?"
             )
         ) {
             return;
         }
-        file_put_contents(database_path("seeders/ShieldSeeder.php"), $result);
+        file_put_contents(database_path("seeders/$seeder.php"), $result);
 
-        $this->info("File written to database/seeders/ShieldSeeder.php");
+        $this->info("File written to database/seeders/$seeder.php");
     }
 }
