@@ -10,7 +10,6 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use Filament\Facades\Filament;
 use Spatie\Permission\Traits\HasRoles;
 
 class {{class}} extends Seeder
