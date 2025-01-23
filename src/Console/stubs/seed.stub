@@ -34,6 +34,14 @@ TXT
 
         $users = [];
 
+        $adminName = null;
+        if (config('filament-shield.super_admin.enabled')) {
+            $adminName = Role::query()->where("name", config('filament-shield.super_admin.name'))->first()->display_name;
+            if (!$adminName) {
+                $this->command->warn("Admin role not found. The name will have to be manually set.");
+            }
+        }
+
         Role::all()->each(function (Role $role) use (&$users) {
             $role->users()->each(function ($user) use (&$users, &$role) {
                 $entry = [
@@ -52,6 +60,16 @@ TXT
             'shield:generate --all --ignore-existing-policies -n --panel={{panel}}'
         );
         $this->command->info("Successfully generated base permissions");
+
+        if ($adminName) {
+            $adminRole = Role::query()->where('name', config('filament-shield.super_admin.name'))->first();
+            if ($adminRole) {
+                $adminRole->display_name = $adminName;
+                $adminRole->save();
+            } else {
+                $this->command->warn("Admin role not found. The name will have to be manually set.");
+            }
+        }
 
 {{roles}}
         collect($users)->each(function ($entry) {
