@@ -3,9 +3,10 @@
   "description": "Package to facilitate persistance of Filament Shield's roles and permissions",
   "type": "library",
   "require": {
-    "laravel/framework": ">=10.0",
     "bezhansalleh/filament-shield": "^3.0",
-    "illuminate/support": "*"
+    "spatie/laravel-permission": "^6.10",
+    "illuminate/support": ">=10.0",
+    "laravel/framework": ">= 10.0"
   },
   "license": "MIT",
   "autoload": {
