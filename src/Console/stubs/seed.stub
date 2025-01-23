@@ -43,9 +43,9 @@ TXT
             }
         }
 
-        DB::transaction(function () {
-            Role::all()->each(function (Role $role) use (&$users) {
-                $role->users()->each(function ($user) use (&$users, &$role) {
+        DB::transaction(function () use (&$users, $adminName) {
+            Role::all()->each(function (Role $role) use (&$users, $adminName) {
+                $role->users()->each(function ($user) use (&$users, &$role, $adminName) {
                     $entry = [
                         "user" => $user,
                         "role" => $role->toArray(),
