@@ -1,0 +1,74 @@
+<?php
+/**
+ * @noinspection PhpMultipleClassDeclarationsInspection
+ * @noinspection DuplicatedCode
+ */
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
+use Spatie\Permission\Models\Role;
+use Filament\Facades\Filament;
+use Illuminate\Auth\EloquentUserProvider;
+use Spatie\Permission\Traits\HasRoles;
+
+class {{class}} Seeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $this->command->warn(
+            <<<TXT
+Careful: This will remove all existing permissions and roles, restoring them to the moment of the last InverseShield execution.
+Make sure you have a backup of your database before running this command.
+
+This command will try its best to restore the roles to each user, but it may fail if the role's name changed.
+TXT
+        );
+
+        if (!$this->command->confirm("Do you wish to continue?")) {
+            return;
+        }
+
+        $users = [];
+
+        Role::all()->each(function (Role $role) use (&$users) {
+            $role->users()->each(function ($user) use (&$users, &$role) {
+                $entry = [
+                    "user" => $user,
+                    "role" => $role->toArray(),
+                ];
+
+                $users[] = $entry;
+            });
+            $role->permissions()->detach();
+            $role->delete();
+        });
+        $this->command->info("Successfully deleted all roles and permissions");
+
+        Artisan::call(
+            'shield:generate --all --ignore-existing-policies -n --panel={{panel}}'
+        );
+        $this->command->info("Successfully generated base permissions");
+
+{{roles}}
+        collect($users)->each(function ($entry) {
+            /** @var HasRoles $user */
+            $user = $entry["user"];
+            $role = $entry["role"];
+
+            if(!Role::findByName( $role['name'])) {
+                /** @noinspection PhpPossiblePolymorphicInvocationInspection */
+                $this->command->warn("Role {$role['name']} not found. Skipping user $user->id.");
+                return;
+            }
+
+            $user->assignRole($role["name"]);
+        });
+
+        $this->command->info("Successfully restored roles to users");
+    }
+}

@@ -57,75 +57,17 @@ PHP;
 
         $panel = $this->option("panel");
         $seeder = $this->option("seeder");
-        $result = <<<PHP
-<?php
-/**
- * @noinspection PhpMultipleClassDeclarationsInspection
- * @noinspection DuplicatedCode
- */
-
-namespace Database\Seeders;
-
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Artisan;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
-
-class ShieldSeeder extends Seeder
-{
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
-    {
-        \$this->command->warn(<<<TXT
-        Careful: This will remove all existing permissions and roles, restoring them to the moment of the last InverseShield execution.
-        Make sure you have a backup of your database before running this command.
-
-        This command will try its best to restore the roles to each user, but it may fail if the role's name changed.
-        TXT);
-
-        if(!\$this->command->confirm("Do you wish to continue?")) {
-            return;
-        }
-
-        \$users = [];
-
-        Role::all()->each(function (Role \$role) {
-            \$role->users()->each(function (\$user) use(&\$users, &\$role) {
-                \$entry = [
-                    "user" => \$user,
-                    "role" => \$role->toArray()
-                ];
-
-                \$users[] = \$entry;
-            });
-            \$role->permissions()->detach();
-            \$role->delete();
-        });
-        \$this->command->info('Successfully deleted all roles and permissions');
-
-        Artisan::call('shield:generate --all --ignore-existing-policies -n --panel=$panel');
-        \$this->command->info('Successfully generated base permissions');
-
-$roles
-        collect(\$users)->each(function (\$entry) {
-            /** @var HasRoles \$user */
-            \$user = \$entry['user'];
-            \$role = \$entry['role'];
-
-            if(!Role::findByName( \$role['name'])) {
-                \$this->command->warn("Role {\$role['name']} not found. Skipping user {\$user->id}.");
-                return;
-            }
-
-            \$user->assignRole(\$role['name']);
-        });
-
-        \$this->command->info('Successfully restored roles to users');
-    }
-}
-PHP;
+        $buffer = file(
+            __DIR__ .
+                DIRECTORY_SEPARATOR .
+                "stubs" .
+                DIRECTORY_SEPARATOR .
+                "seed.stub"
+        );
+        $result = implode(PHP_EOL, $buffer);
+        $result = str_replace("{{roles}}", $roles, $result);
+        $result = str_replace("{{class}}", $seeder, $result);
+        $result = str_replace("{{panel}}", $panel, $result);
         if (
             file_exists(database_path("seeders/$seeder.php")) &&
             !$this->confirm(
