@@ -8,12 +8,12 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Filament\Facades\Filament;
-use Illuminate\Auth\EloquentUserProvider;
 use Spatie\Permission\Traits\HasRoles;
 
-class {{class}} Seeder extends Seeder
+class {{class}} extends Seeder
 {
     /**
      * Run the database seeds.
