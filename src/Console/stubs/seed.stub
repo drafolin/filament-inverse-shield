@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Artisan;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Support\Facades\DB;
 
 class {{class}} extends Seeder
 {
@@ -42,48 +43,50 @@ TXT
             }
         }
 
-        Role::all()->each(function (Role $role) use (&$users) {
-            $role->users()->each(function ($user) use (&$users, &$role) {
-                $entry = [
-                    "user" => $user,
-                    "role" => $role->toArray(),
-                ];
+        DB::transaction(function () {
+            Role::all()->each(function (Role $role) use (&$users) {
+                $role->users()->each(function ($user) use (&$users, &$role) {
+                    $entry = [
+                        "user" => $user,
+                        "role" => $role->toArray(),
+                    ];
 
-                $users[] = $entry;
+                    $users[] = $entry;
+                });
+                $role->permissions()->detach();
+                $role->delete();
             });
-            $role->permissions()->detach();
-            $role->delete();
-        });
-        $this->command->info("Successfully deleted all roles and permissions");
+            $this->command->info("Successfully deleted all roles and permissions");
 
-        Artisan::call(
-            'shield:generate --all --ignore-existing-policies -n --panel={{panel}}'
-        );
-        $this->command->info("Successfully generated base permissions");
+            Artisan::call(
+                'shield:generate --all --ignore-existing-policies -n --panel={{panel}}'
+            );
+            $this->command->info("Successfully generated base permissions");
 
-        if ($adminName) {
-            $adminRole = Role::query()->where('name', config('filament-shield.super_admin.name'))->first();
-            if ($adminRole) {
-                $adminRole->display_name = $adminName;
-                $adminRole->save();
-            } else {
-                $this->command->warn("Admin role not found. The name will have to be manually set.");
+            if ($adminName) {
+                $adminRole = Role::query()->where('name', config('filament-shield.super_admin.name'))->first();
+                if ($adminRole) {
+                    $adminRole->display_name = $adminName;
+                    $adminRole->save();
+                } else {
+                    $this->command->warn("Admin role not found. The name will have to be manually set.");
+                }
             }
-        }
 
 {{roles}}
-        collect($users)->each(function ($entry) {
-            /** @var HasRoles $user */
-            $user = $entry["user"];
-            $role = $entry["role"];
+            collect($users)->each(function ($entry) {
+                /** @var HasRoles $user */
+                $user = $entry["user"];
+                $role = $entry["role"];
 
-            if(!Role::findByName( $role['name'])) {
-                /** @noinspection PhpPossiblePolymorphicInvocationInspection */
-                $this->command->warn("Role {$role['name']} not found. Skipping user $user->id.");
-                return;
-            }
+                if(!Role::findByName( $role['name'])) {
+                    /** @noinspection PhpPossiblePolymorphicInvocationInspection */
+                    $this->command->warn("Role {$role['name']} not found. Skipping user $user->id.");
+                    return;
+                }
 
-            $user->assignRole($role["name"]);
+                $user->assignRole($role["name"]);
+            });
         });
 
         $this->command->info("Successfully restored roles to users");
