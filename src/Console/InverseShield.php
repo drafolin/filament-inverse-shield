@@ -62,7 +62,8 @@ PHP;
                 DIRECTORY_SEPARATOR .
                 "stubs" .
                 DIRECTORY_SEPARATOR .
-                "seed.stub"
+                "seed.stub",
+            FILE_IGNORE_NEW_LINES
         );
         $result = implode(PHP_EOL, $buffer);
         $result = str_replace("{{roles}}", $roles, $result);
