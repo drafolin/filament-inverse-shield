@@ -109,8 +109,6 @@ class ShieldSeeder extends Seeder
         \$this->command->info('Successfully generated base permissions');
 
 $roles
-
-
         collect(\$users)->each(function (\$entry) {
             /** @var HasRoles \$user */
             \$user = \$entry['user'];
@@ -123,6 +121,8 @@ $roles
 
             \$user->assignRole(\$role['name']);
         });
+
+        \$this->command->info('Successfully restored roles to users');
     }
 }
 PHP;
