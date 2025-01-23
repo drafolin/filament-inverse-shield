@@ -79,16 +79,27 @@ class ShieldSeeder extends Seeder
     public function run(): void
     {
         \$this->command->warn(<<<TXT
-        Careful: This will remove all existing user-roles relations.
-        It will also remove all existing permissions and roles, restoring them to the moment of the last InverseShield execution.
+        Careful: This will remove all existing permissions and roles, restoring them to the moment of the last InverseShield execution.
         Make sure you have a backup of your database before running this command.
+
+        This command will try its best to restore the roles to each user, but it may fail if the role's name changed.
         TXT);
 
         if(!\$this->command->confirm("Do you wish to continue?")) {
             return;
         }
 
+        \$users = [];
+
         Role::all()->each(function (Role \$role) {
+            \$role->users()->each(function (\$user) use(&\$users, &\$role) {
+                \$entry = [
+                    "user" => \$user,
+                    "role" => \$role->toArray()
+                ];
+
+                \$users[] = \$entry;
+            });
             \$role->permissions()->detach();
             \$role->delete();
         });
@@ -99,6 +110,19 @@ class ShieldSeeder extends Seeder
 
 $roles
 
+
+        collect(\$users)->each(function (\$entry) {
+            /** @var HasRoles \$user */
+            \$user = \$entry['user'];
+            \$role = \$entry['role'];
+
+            if(!Role::findByName( \$role['name'])) {
+                \$this->command->warn("Role {\$role['name']} not found. Skipping user {\$user->id}.");
+                return;
+            }
+
+            \$user->assignRole(\$role['name']);
+        });
     }
 }
 PHP;

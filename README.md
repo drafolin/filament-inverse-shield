@@ -33,6 +33,12 @@ To load the roles and permissions from the seeder file, you need to run the foll
 php artisan db:seed --class=ShieldSeeder
 ```
 
+> [!CAUTON]
+> This command deletes all roles and permissions, restoring them to the time the `inverse-shield` command was run.
+>
+> It also tries its best to restore the roles to each user, accordingly to the **name** of the role.
+> If the role was renamed, the user will lose the role. A warning will be displayed in this case.
+
 ## Parameters
 
 The `inverse-shield` command supports the default artisan parameters, as well as the following custom parameters:
