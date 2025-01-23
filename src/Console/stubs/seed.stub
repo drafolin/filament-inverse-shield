@@ -12,11 +12,13 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class {{class}} extends Seeder
 {
     /**
      * Run the database seeds.
+     * @throws Throwable
      */
     public function run(): void
     {
