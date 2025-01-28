@@ -13,7 +13,7 @@ class InverseShield extends Command
      *
      * @var string
      */
-    protected $signature = "inverse-shield {--panel=admin} {--seeder=ShieldSeeder} {--admin-role=admin}";
+    protected $signature = "inverse-shield {--panel=admin} {--seeder=ShieldSeeder}";
 
     /**
      * The console command description.
@@ -28,7 +28,7 @@ class InverseShield extends Command
     public function handle(): void
     {
         $roles = "";
-        $adminRole = $this->option("admin-role");
+        $adminRole = config("filament-shield.super_admin.name", "admin");
         Role::query()
             ->where("name", "<>", $adminRole)
             ->get()
