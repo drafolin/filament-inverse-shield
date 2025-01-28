@@ -35,9 +35,16 @@ class InverseShield extends Command
             ->each(function (Role $role) use (&$roles) {
                 $roles .= <<<PHP
             \$role = new Role;
-            \$role->name = '{$role->name}';
-            \$role->display_name = '{$role->display_name}';
-            \$role->guard_name = '{$role->guard_name}';
+PHP;
+                collect($role->toArray())
+                    ->except(["id", "created_at", "updated_at"])
+                    ->each(function ($value, $key) use (&$roles) {
+                        $value = var_export($value, true);
+                        $roles .= <<<PHP
+            \$role->$key = $value;\n
+PHP;
+                    });
+                $roles .= <<<PHP
             \$role->save();\n
 PHP;
 
