@@ -8,22 +8,22 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
-use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class {{class}} extends Seeder
 {
     /**
      * Run the database seeds.
+     *
      * @throws Throwable
      */
     public function run(): void
     {
         $this->command->warn(
-            <<<TXT
+            <<<'TXT'
 Careful: This will remove all existing permissions and roles, restoring them to the moment of the last InverseShield execution.
 Make sure you have a backup of your database before running this command.
 
@@ -31,7 +31,7 @@ This command will try its best to restore the roles to each user, but it may fai
 TXT
         );
 
-        if (!$this->command->confirm("Do you wish to continue?")) {
+        if (! $this->command->confirm('Do you wish to continue?')) {
             return;
         }
 
@@ -39,18 +39,18 @@ TXT
 
         $adminName = null;
         if (config('filament-shield.super_admin.enabled')) {
-            $adminName = Role::query()->where("name", config('filament-shield.super_admin.name'))->first()->display_name;
-            if (!$adminName) {
-                $this->command->warn("Admin role not found. The name will have to be manually set.");
+            $adminName = Role::query()->where('name', config('filament-shield.super_admin.name'))->first()->display_name;
+            if (! $adminName) {
+                $this->command->warn('Admin role not found. The name will have to be manually set.');
             }
         }
 
         DB::transaction(function () use (&$users, $adminName) {
-            Role::all()->each(function (Role $role) use (&$users, $adminName) {
-                $role->users()->each(function ($user) use (&$users, &$role, $adminName) {
+            Role::all()->each(function (Role $role) use (&$users) {
+                $role->users()->each(function ($user) use (&$users, &$role) {
                     $entry = [
-                        "user" => $user,
-                        "role" => $role->toArray(),
+                        'user' => $user,
+                        'role' => $role->toArray(),
                     ];
 
                     $users[] = $entry;
@@ -58,12 +58,13 @@ TXT
                 $role->permissions()->detach();
                 $role->delete();
             });
-            $this->command->info("Successfully deleted all roles and permissions");
+
+            $this->command->info('Successfully deleted all roles and permissions');
 
             Artisan::call(
                 'shield:generate --all --ignore-existing-policies -n --panel={{panel}}'
             );
-            $this->command->info("Successfully generated base permissions");
+            $this->command->info('Successfully generated base permissions');
 
             if ($adminName) {
                 $adminRole = Role::query()->where('name', config('filament-shield.super_admin.name'))->first();
@@ -71,26 +72,26 @@ TXT
                     $adminRole->display_name = $adminName;
                     $adminRole->save();
                 } else {
-                    $this->command->warn("Admin role not found. The name will have to be manually set.");
+                    $this->command->warn('Admin role not found. The name will have to be manually set.');
                 }
             }
 
 {{roles}}
             collect($users)->each(function ($entry) {
                 /** @var HasRoles $user */
-                $user = $entry["user"];
-                $role = $entry["role"];
+                $user = $entry['user'];
+                $role = $entry['role'];
 
-                if(!Role::findByName( $role['name'])) {
+                if (! Role::findByName($role['name'])) {
                     /** @noinspection PhpPossiblePolymorphicInvocationInspection */
                     $this->command->warn("Role {$role['name']} not found. Skipping user $user->id.");
                     return;
                 }
 
-                $user->assignRole($role["name"]);
+                $user->assignRole($role['name']);
             });
         });
 
-        $this->command->info("Successfully restored roles to users");
+        $this->command->info('Successfully restored roles to users');
     }
 }

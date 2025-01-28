@@ -34,7 +34,7 @@ class InverseShield extends Command
             ->get()
             ->each(function (Role $role) use (&$roles) {
                 $roles .= <<<PHP
-            \$role = new Role;
+            \$role = new Role;\n
 PHP;
                 collect($role->toArray())
                     ->except(["id", "created_at", "updated_at"])
@@ -56,7 +56,7 @@ PHP;
 PHP;
                     });
                 $roles .= <<<PHP
-            \$this->command->info("Role $role->name created.");\n\n
+            \$this->command->info('Role $role->name created.');\n
 PHP;
                 $this->info("Role $role->name dumped.");
             });
@@ -85,7 +85,7 @@ PHP;
         ) {
             return;
         }
-        file_put_contents(database_path("seeders/$seeder.php"), $result);
+        file_put_contents(database_path("seeders/$seeder.php"), $result . "\n");
 
         $this->info("File written to database/seeders/$seeder.php");
     }
