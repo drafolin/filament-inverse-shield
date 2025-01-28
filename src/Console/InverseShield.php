@@ -13,7 +13,7 @@ class InverseShield extends Command
      *
      * @var string
      */
-    protected $signature = "inverse-shield {--panel=admin} {--seeder=ShieldSeeder}";
+    protected $signature = "inverse-shield {--panel=admin} {--seeder=ShieldSeeder} {--admin-role=admin}";
 
     /**
      * The console command description.
@@ -28,8 +28,9 @@ class InverseShield extends Command
     public function handle(): void
     {
         $roles = "";
+        $adminRole = $this->option("admin-role");
         Role::query()
-            ->where("name", "<>", "admin")
+            ->where("name", "<>", $adminRole)
             ->get()
             ->each(function (Role $role) use (&$roles) {
                 $roles .= <<<PHP
