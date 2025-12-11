@@ -34,6 +34,7 @@ class InverseShield extends Command
             ->get()
             ->each(function (Role $role) use (&$roles) {
                 $roles .= <<<PHP
+
             \$role = new Role;\n
 PHP;
                 collect($role->toArray())
@@ -57,11 +58,11 @@ PHP;
                     ->sortBy('name')
                     ->each(function (Permission $permission) use (&$roles) {
                         $roles .= <<<PHP
-            \$role->permissions()->attach(Permission::findByName("$permission->name"));\n
+            \$role->permissions()->attach(Permission::findByName('$permission->name'));\n
 PHP;
                     });
                 $roles .= <<<PHP
-            \$this->command->info('Role $role->name created.');\n\n
+            \$this->command->info('Role $role->name created.');\n
 PHP;
                 $this->info("Role $role->name dumped.");
             });

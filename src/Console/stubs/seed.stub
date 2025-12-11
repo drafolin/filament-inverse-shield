@@ -80,7 +80,6 @@ TXT
                     $this->command->warn('Admin role not found. The name will have to be manually set.');
                 }
             }
-
 {{roles}}
             collect($users)->each(function ($entry) {
                 /** @var HasRoles $user */
