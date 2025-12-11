@@ -50,13 +50,17 @@ PHP;
 
                 $role
                     ->permissions()
+                    ->get()
+                    ->filter(function (Permission $permission) use ($role) {
+                        return $permission->name !== $role->name;
+                    })
                     ->each(function (Permission $permission) use (&$roles) {
                         $roles .= <<<PHP
-                \$role->permissions()->attach(Permission::findByName("$permission->name"));\n
+            \$role->permissions()->attach(Permission::findByName("$permission->name"));\n
 PHP;
                     });
                 $roles .= <<<PHP
-            \$this->command->info('Role $role->name created.');\n
+            \$this->command->info('Role $role->name created.');\n\n
 PHP;
                 $this->info("Role $role->name dumped.");
             });
