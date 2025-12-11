@@ -9,6 +9,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
@@ -47,6 +48,8 @@ TXT
         }
 
         DB::transaction(function () use (&$users, $adminName) {
+            Schema::disableForeignKeyConstraints();
+
             Role::all()->each(function (Role $role) use (&$users) {
                 $role->users()->each(function ($user) use (&$users, &$role) {
                     $entry = [
@@ -56,7 +59,8 @@ TXT
 
                     $users[] = $entry;
                 });
-                $role->permissions()->detach();
+                $role->users()->detach();
+                $role->permissions()->delete();
                 $role->delete();
             });
 
@@ -91,6 +95,8 @@ TXT
 
                 $user->assignRole($role['name']);
             });
+
+            Schema::enableForeignKeyConstraints();
         });
 
         $this->command->info('Successfully restored roles to users');
