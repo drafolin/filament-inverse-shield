@@ -54,6 +54,7 @@ PHP;
                     ->filter(function (Permission $permission) use ($role) {
                         return $permission->name !== $role->name;
                     })
+                    ->sortBy('name')
                     ->each(function (Permission $permission) use (&$roles) {
                         $roles .= <<<PHP
             \$role->permissions()->attach(Permission::findByName("$permission->name"));\n
