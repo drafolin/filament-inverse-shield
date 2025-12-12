@@ -38,7 +38,7 @@ class InverseShield extends Command
             \$role = new Role;\n
 PHP;
                 collect($role->toArray())
-                    ->except(["id", "created_at", "updated_at"])
+                    ->except(["created_at", "updated_at"])
                     ->each(function ($value, $key) use (&$roles) {
                         $value = var_export($value, true);
                         $roles .= <<<PHP
