@@ -39,15 +39,15 @@ TXT
 
         $users = [];
 
-        $adminName = null;
+        $adminData = null;
         if (config('filament-shield.super_admin.enabled')) {
-            $adminName = Role::query()->where('name', config('filament-shield.super_admin.name'))->first()?->display_name;
-            if (! $adminName) {
+            $adminData = Role::query()->where('name', config('filament-shield.super_admin.name'))->first()?->toArray();
+            if (! $adminData) {
                 $this->command->warn('Admin role not found. The name will have to be manually set.');
             }
         }
 
-        DB::transaction(function () use (&$users, $adminName) {
+        DB::transaction(function () use (&$users, $adminData) {
             Schema::disableForeignKeyConstraints();
 
             Role::all()->each(function (Role $role) use (&$users) {
@@ -67,14 +67,20 @@ TXT
             $this->command->info('Successfully deleted all roles and permissions');
 
             Artisan::call(
-                'shield:generate --all --ignore-existing-policies -n --panel={{panel}}'
+                'shield:generate --all --option=permissions -n --panel={{panel}}'
             );
             $this->command->info('Successfully generated base permissions');
 
-            if ($adminName) {
+            if ($adminData) {
                 $adminRole = Role::query()->where('name', config('filament-shield.super_admin.name'))->first();
                 if ($adminRole) {
-                    $adminRole->display_name = $adminName;
+                    $adminRole->permissions()->each(function ($d) use ($adminData) {
+                        $d->pivot->role_id = $adminData['id'];
+                        $d->pivot->save();
+                    });
+                    foreach ($adminData as $key => $value) {
+                        $adminRole->$key = $value;
+                    }
                     $adminRole->save();
                 } else {
                     $this->command->warn('Admin role not found. The name will have to be manually set.');
