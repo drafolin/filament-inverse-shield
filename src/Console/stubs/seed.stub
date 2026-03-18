@@ -96,9 +96,9 @@ TXT
 
                 $user->assignRole($role['name']);
             });
-
-            Schema::enableForeignKeyConstraints();
         });
+
+        Schema::enableForeignKeyConstraints();
 
         $this->command->info('Successfully restored roles to users');
     }
